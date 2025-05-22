@@ -1,12 +1,11 @@
 name: Update Blog Posts
-  
 
 on:
   push:
-      branches:
-        - master  # 또는 워크플로우를 트리거하고 싶은 브랜치 이름
+    branches:
+      - master
   schedule:
-    - cron: '0 0 * * *'  # 매일 자정에 실행
+    - cron: '0 0 * * *'  # 매일 자정 실행
 
 jobs:
   update_blog:
@@ -15,12 +14,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Push changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git push https://${{ secrets.GH_PAT }}@github.com/rimgosu/velog.git
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -31,5 +24,14 @@ jobs:
       run: |
         pip install feedparser gitpython
 
-    - name: Run script
-      run: python scripts/update_blog.py
+    - name: Run update_blog.py
+      run: python update_blog.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/kaylee125/my_velog.git
+        git add .
+        git commit -m "🤖 Update blog posts" || echo "No changes to commit"
+        git push origin master
